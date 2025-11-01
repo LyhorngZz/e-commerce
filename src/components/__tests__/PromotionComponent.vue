@@ -2,7 +2,7 @@
   <div class="promotion-card" :style="{ backgroundColor: props.bgcolor }">
     <div class="promo-text">
       <h2>{{ title }}</h2>
-      <ButtonComponent :color="buttonColor" text="Shop Now" />
+      <ButtonComponent @click = "ShopNow" :color="buttonColor" text="Shop Now" />
     </div>
     <img :src="image" alt="promotion" class="promo-img" />
   </div>
@@ -10,6 +10,10 @@
 
 <script setup lang="ts">
 import ButtonComponent from './ButtonComponent.vue'
+
+const ShopNow = (): void => {
+  alert('Let\'s shop: '+ props.title)
+}
 
 interface Props {
   title: string
@@ -33,8 +37,8 @@ const props = defineProps<Props>()
 }
 
 .promo-text {
-  margin-left: 15px;
-  max-width: 80%;
+  margin-left: 10px;
+  max-width: 70%;
 }
 
 .promo-text h2 {
