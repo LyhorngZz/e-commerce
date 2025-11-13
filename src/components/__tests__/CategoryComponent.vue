@@ -1,8 +1,8 @@
 <template>
   <div class="category-card" :style="{ backgroundColor: props.bgcolor }">
-    <img :src="image" alt="category" class="category-img" />
-    <h3>{{ name }}</h3>
-    <p>{{ items }} items</p>
+    <img :src="props.image" alt="category" class="category-img" />
+    <h3>{{ props.name }}</h3>
+    <p>{{ props.items }} items</p>
   </div>
 </template>
 
