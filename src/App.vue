@@ -31,6 +31,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import CategoryComponent from './components/__tests__/CategoryComponent.vue'
 import PromotionComponent from './components/__tests__/PromotionComponent.vue'
+//import {useProductStore} from '@/stores/product_store'
 
 interface Category {
   name: string
@@ -82,6 +83,8 @@ interface Promotion {
 
 const categories = ref<Category[]>([])
 const promotions = ref<Promotion[]>([])
+
+//const productStore = useProductStore()
 
 async function fetchCategories() {
   try {
