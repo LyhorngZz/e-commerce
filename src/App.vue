@@ -1,9 +1,16 @@
 <template>
   <div class="container">
+    <!-- Menu Section for categories -->
+    <MenuComponent title="Featured Categories"
+      :tabs="categoryTabs"
+      :activeTab="activeCategoryTab"
+      @tab-change="handleCategoryTabChange"
+    />
+
     <!-- Category Section -->
     <div class="category-section">
       <CategoryComponent
-        v-for="(item, index) in categories"
+        v-for="(item, index) in displayCategories"
         :key="index"
         :name="item.name"
         :items="item.productCount"
@@ -15,7 +22,7 @@
     <!-- Promotion Section -->
     <div class="promotion-section">
       <PromotionComponent
-        v-for="(promo, i) in promotions"
+        v-for="(promo, i) in productStore.promotions"
         :key="i"
         :title="promo.title"
         :image="fixImage(promo.image)"
@@ -23,29 +30,54 @@
         :buttonColor="promo.buttonColor"
       />
     </div>
+
+    <!-- Menu Section for popular product -->
+    <MenuComponent title="Featured Categories"
+      :tabs="productTabs"
+      :activeTab="activeProductTab"
+      @tab-change="handleProductTabChange"
+    />
+    <div class="productContainer">
+      <ProductComponent
+        v-for="product in displayedPopularProducts"
+        :key="product.id"
+        :name="product.name"
+        :category="getCategoryName(product.categoryId)"
+        :image="product.image"
+        :price="product.price"
+        :rating="product.rating"
+        :size="product.size"
+        :discount="product.discount"
+        @add-to-cart="handleAddToCart(product)"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, computed, onMounted } from 'vue'
+//import axios from 'axios'
 import CategoryComponent from './components/__tests__/CategoryComponent.vue'
 import PromotionComponent from './components/__tests__/PromotionComponent.vue'
 //import {useProductStore} from '@/stores/product_store'
+import MenuComponent from './components/__tests__/MenuComponent.vue'
+import ProductComponent from './components/__tests__/ProductComponent.vue'
+import type { product } from './stores/product_store'
+import { useProductStore } from './stores/product_store'
 
-interface Category {
-  name: string
-  productCount: number
-  image: string
-  color: string
-}
+// interface Category {
+//   name: string
+//   productCount: number
+//   image: string
+//   color: string
+// }
 
-interface Promotion {
-  title: string
-  image: string
-  color: string
-  buttonColor: 'green' | 'orange'
-}
+// interface Promotion {
+//   title: string
+//   image: string
+//   color: string
+//   buttonColor: 'green' | 'orange'
+// }
 
 // const categories: Category[] = [
 //   { name: 'Cake & Milk', items: 14, image: 'src/assets/cat-13 1.png', bgcolor: '#F2FCE4' },
@@ -81,37 +113,101 @@ interface Promotion {
 //   },
 // ]
 
-const categories = ref<Category[]>([])
-const promotions = ref<Promotion[]>([])
+// const categories = ref<Category[]>([])
+// const promotions = ref<Promotion[]>([])
 
 //const productStore = useProductStore()
 
-async function fetchCategories() {
-  try {
-    const response = await axios.get("http://localhost:3000/api/categories")
-    categories.value = response.data
-  } catch (error) {
-    console.error("Error fetching categories:", error)
-  }
-}
+// async function fetchCategories() {
+//   try {
+//     const response = await axios.get("http://localhost:3000/api/categories")
+//     categories.value = response.data
+//   } catch (error) {
+//     console.error("Error fetching categories:", error)
+//   }
+// }
 
-async function fetchPromotions() {
-  try {
-    const response = await axios.get("http://localhost:3000/api/promotions")
-    promotions.value = response.data
-  } catch (error) {
-    console.error("Error fetching promotions:", error)
-  }
-}
+// async function fetchPromotions() {
+//   try {
+//     const response = await axios.get("http://localhost:3000/api/promotions")
+//     promotions.value = response.data
+//   } catch (error) {
+//     console.error("Error fetching promotions:", error)
+//   }
+// }
 
 function fixImage(path: string): string {
   return path.startsWith('http') ? path : `http://localhost:3000/${path.replace(/\\/g, "/")}`
 }
 
+const productStore = useProductStore();
+const activeCategoryTab = ref('All');
+const activeProductTab = ref('All');
+
+// onMounted(() => {
+//   fetchCategories()
+//   fetchPromotions()
+// })
+
 onMounted(() => {
-  fetchCategories()
-  fetchPromotions()
+  productStore.fetchCategories()
+  productStore.fetchPromotions()
+  productStore.fetchGroups()
+  productStore.fetchProducts()
 })
+
+// Categories tabs
+const categoryTabs = computed(() => {
+  const groups = productStore.getGroupNames
+  return ['All', ...groups]
+})
+
+// Handle categories tabs change
+const handleCategoryTabChange = (tab: string) => {
+  activeCategoryTab.value = tab
+}
+
+// Display categories based on active tab
+const displayCategories = computed(() => {
+  if (activeCategoryTab.value === 'All') {
+    return productStore.categories.slice(0, 10)
+  } else {
+    return productStore.getCategoriesByGroup(activeCategoryTab.value)
+  }
+})
+
+// Product tabs
+const productTabs = computed(() => {
+  const groups = productStore.getGroupNames
+  return ['All', ...groups]
+})
+
+// Handle product tab change
+const handleProductTabChange = (tab: string) => {
+  activeProductTab.value = tab
+}
+
+// Display popular products based on active tab
+const displayedPopularProducts = computed(() => {
+  let products = productStore.getPopularProducts
+
+  if (activeProductTab.value != 'All'){
+    products = products.filter(p => p.group === activeProductTab.value)
+  }
+  return products.slice(0, 10)
+})
+
+// Handle function to get category name by id
+const getCategoryName = (categoryId: number) => {
+  const category = productStore.categories.find(c => c.id === categoryId)
+  return category ? category.name : 'Hodo Foods'
+}
+
+// Handle add to cart
+const handleAddToCart = (product: product) => {
+  console.log('Added to cart:', product)
+  alert(`Added ${product.name} to cart!`)
+}
 
 </script>
 
@@ -124,7 +220,7 @@ onMounted(() => {
 
 .category-section {
   display: flex;
-  justify-content: center;
+  justify-content: start;
   gap: 15px;
   margin-bottom: 50px;
 }
@@ -133,5 +229,12 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 25px;
+}
+
+.productContainer {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  margin-bottom: 50px;
 }
 </style>
