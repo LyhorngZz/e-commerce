@@ -1,5 +1,9 @@
 <template>
-  <div class="category-card" :style="{ backgroundColor: props.bgcolor }">
+  <div
+    class="category-card"
+    :style="{ backgroundColor: props.bgcolor }"
+    @click="goToCategory"
+  >
     <img :src="props.image" alt="category" class="category-img" />
     <h3>{{ props.name }}</h3>
     <p>{{ props.items }} items</p>
@@ -7,7 +11,10 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+
 interface Props {
+  id: string | number
   name: string
   items: number
   image: string
@@ -15,6 +22,11 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const router = useRouter()
+
+function goToCategory() {
+  router.push(`/categories/${props.id}`)
+}
 </script>
 
 <style scoped>
@@ -23,8 +35,7 @@ const props = defineProps<Props>()
   height: 185px;
   text-align: center;
   border-radius: 10px;
-  border: 1px solid;
-  border-color: #81b13d;
+  border: 1px solid #81b13d;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   padding: 5px;
   transition: all 0.3s ease;

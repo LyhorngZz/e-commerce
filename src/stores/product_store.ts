@@ -109,6 +109,16 @@ export const useProductStore = defineStore('product', {
             }
         },
 
+        async fetchCategoryById(id: string | number) {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/categories/${id}`)
+                return response.data
+            } catch (error) {
+                console.error(`Error fetching category with id ${id}:`, error)
+                return null
+            }
+        },
+
         async fetchPromotions() {
             try {
                 const response = await axios.get("http://localhost:3000/api/promotions");

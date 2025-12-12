@@ -2,20 +2,19 @@
   <div class="promotion-card" :style="{ backgroundColor: props.bgcolor }">
     <div class="promo-text">
       <h2>{{ title }}</h2>
-      <ButtonComponent @click = "ShopNow" :color="buttonColor" text="Shop Now" />
+      <!-- Button navigates to product detail -->
+      <ButtonComponent @click="shopNow" :color="buttonColor" text="Shop Now" />
     </div>
     <img :src="image" alt="promotion" class="promo-img" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import ButtonComponent from './ButtonComponent.vue'
 
-const ShopNow = (): void => {
-  alert('Let\'s shop: '+ props.title)
-}
-
 interface Props {
+  id?: number // optional for now (static)
   title: string
   image: string
   bgcolor: string
@@ -23,6 +22,14 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const router = useRouter()
+
+// Navigate to the product detail page
+const shopNow = () => {
+  // if ID is provided, go to that product — otherwise go to a static one
+  const productId = props.id || 1
+  router.push(`/products/${productId}`)
+}
 </script>
 
 <style scoped>

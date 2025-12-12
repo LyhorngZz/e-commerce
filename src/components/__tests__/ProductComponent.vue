@@ -1,49 +1,61 @@
 <template>
-  <div class="product-card">
-    <div class="product-badge" 
-        v-if="discount && discount > 0">-{{ Math.round(discount) }}%
-    </div>
+  <!-- Wrap card with RouterLink -->
+  <RouterLink :to="`/products/${id}`" class="product-card-link">
+    <div class="product-card">
+      <div class="product-badge" v-if="discount && discount > 0">
+        -{{ Math.round(discount) }}%
+      </div>
 
-    <div class="product-image">
-      <img :src="image" :alt="name" />
-    </div>
+      <div class="product-image">
+        <img :src="image" :alt="name" />
+      </div>
 
-    <div class="product-info">
-      <div class="product-category">{{ category }}</div>
-      <h3 class="product-name">{{ name }}</h3>
+      <div class="product-info">
+        <div class="product-category">{{ category }}</div>
+        <h3 class="product-name">{{ name }}</h3>
 
-      <div class="product-rating">
-        <div class="stars">
-          <span v-for="i in 5" 
-                :key="i" class="star"
-                :class="{ filled: i <= Math.round(rating) }">★</span>
+        <div class="product-rating">
+          <div class="stars">
+            <span
+              v-for="i in 5"
+              :key="i"
+              class="star"
+              :class="{ filled: i <= Math.round(rating) }"
+              >★</span
+            >
+          </div>
+          <span class="rating-text">({{ rating.toFixed(1) }})</span>
         </div>
-        <span class="rating-text">({{ rating.toFixed(1) }})</span>
-      </div>
 
-      <div class="product-meta">
-        <span class="product-size">{{ size }}</span>
-      </div>
-
-      <div class="product-footer">
-        <div class="product-price">
-          <span class="current-price">${{ currentPrice }}</span>
-          <span class="old-price" 
-                v-if="discount && discount > 0">${{ price.toFixed(2) }}</span>
+        <div class="product-meta">
+          <span class="product-size">{{ size }}</span>
         </div>
-        <button class="add-button" @click="$emit('add-to-cart')">
-          <span>Add</span>
-          <span class="add-icon">+</span>
-        </button>
+
+        <div class="product-footer">
+          <div class="product-price">
+            <span class="current-price">${{ currentPrice }}</span>
+            <span
+              class="old-price"
+              v-if="discount && discount > 0"
+              >${{ price.toFixed(2) }}</span
+            >
+          </div>
+          <!-- Stop event so it doesn't navigate -->
+          <button class="add-button" @click.stop="$emit('add-to-cart')">
+            <span>Add</span>
+            <span class="add-icon">+</span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </RouterLink>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 
 const props = defineProps<{
+  id: number
   name: string
   rating: number
   size: string
@@ -53,9 +65,7 @@ const props = defineProps<{
   category: string
 }>()
 
-defineEmits<{
-  'add-to-cart': []
-}>()
+defineEmits<{ 'add-to-cart': [] }>()
 
 const currentPrice = computed(() => {
   if (props.discount && props.discount > 0) {
@@ -66,6 +76,12 @@ const currentPrice = computed(() => {
 </script>
 
 <style scoped>
+.product-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 .product-card {
   border: 1px solid #ececec;
   border-radius: 15px;
@@ -80,7 +96,7 @@ const currentPrice = computed(() => {
 
 .product-card:hover {
   box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.08);
-  border-color: #BCE3C9;
+  border-color: #bce3c9;
   transform: translateY(-3px);
 }
 
@@ -94,7 +110,6 @@ const currentPrice = computed(() => {
   border-radius: 99px;
   font-size: 14px;
   font-weight: 700;
-  z-index: 1;
 }
 
 .product-image {
@@ -108,7 +123,6 @@ const currentPrice = computed(() => {
 
 .product-image img {
   max-width: 80%;
-
 }
 
 .product-info {
@@ -118,60 +132,6 @@ const currentPrice = computed(() => {
   flex-direction: column;
 }
 
-.product-category {
-  color: #adadad;
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-
-.product-name {
-  font-size: 16px;
-  font-weight: 700;
-  color: #253D4E;
-  margin-bottom: 10px;
-  min-height: 44px;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.product-rating {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.stars {
-  display: flex;
-  gap: 2px;
-}
-
-.star {
-  color: #E0E0E0;
-  font-size: 14px;
-}
-
-.star.filled {
-  color: #FDC040;
-}
-
-.rating-text {
-  color: #B6B6B6;
-  font-size: 14px;
-}
-
-.product-meta {
-  margin-bottom: 15px;
-  flex: 1;
-}
-
-.product-size {
-  color: #adadad;
-  font-size: 14px;
-}
-
 .product-footer {
   display: flex;
   justify-content: space-between;
@@ -179,27 +139,9 @@ const currentPrice = computed(() => {
   margin-top: auto;
 }
 
-.product-price {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.current-price {
-  font-size: 18px;
-  font-weight: 700;
-  color: #3BB77E;
-}
-
-.old-price {
-  font-size: 14px;
-  color: #adadad;
-  text-decoration: line-through;
-}
-
 .add-button {
-  background: #DEF9EC;
-  color: #3BB77E;
+  background: #def9ec;
+  color: #3bb77e;
   border: none;
   padding: 8px 18px;
   border-radius: 5px;
@@ -213,12 +155,7 @@ const currentPrice = computed(() => {
 }
 
 .add-button:hover {
-  background: #3BB77E;
+  background: #3bb77e;
   color: white;
-}
-
-.add-icon {
-  font-size: 18px;
-  font-weight: 700;
 }
 </style>
