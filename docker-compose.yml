@@ -21,8 +21,8 @@ services:
   db:
     image: mysql:8.0
     container_name: mysql_db
-    ports:
-      - "3306:3306"
+    # ports:
+    #   - "3306:3306"  #Disable port mapping
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: laravel
