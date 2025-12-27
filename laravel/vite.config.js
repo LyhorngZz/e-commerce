@@ -8,4 +8,12 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    server: {
+        host: '0.0.0.0',   // 👈 REQUIRED FOR DOCKER
+        port: 5173,
+        strictPort: true,
+        hmr: {
+            host: 'localhost',
+        },
+    },
 });
