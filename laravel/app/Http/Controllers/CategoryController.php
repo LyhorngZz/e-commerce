@@ -7,62 +7,79 @@ use App\Models\Category;
 
 class CategoryController extends Controller
 {
-    // // --- Get /api/categories ---
-    // public function getCategories(){
-    //     return ["message" => "Getting list of categories"];
-    // }
-
-    // // --- Post /api/categories ---
-    // public function createCategory(Request $request){
-    //     return ["message" => "Creating 1 new category"];
-    // }
-
-    // // --- Patch /api/categories/{categoryId} ---
-    // public function updateCategory($categoryId){
-    //     return ["message" => "Updating 1 category base on given categoryID"];
-    // }
-
-    // // --- Delete /api/categories/{categoryId} ---
-    // public function deleteCategory($categoryId){
-    //     return ["message" => "Deleting 1 category base on given categoryID"];
-    // }
-
-    // GET /api/categories
-    public function getCategories()
+    /**
+     * GET /api/categories
+     */
+    public function getCategories(Request $request)
     {
-        return Category::all();
+        $user = $request->user();
+
+        if ($user->hasRole('admin')) {
+            return response()->json(Category::all());
+        }
+
+        if ($user->hasRole('manager')) {
+            return response()->json(
+                Category::where('created_by', $user->id)->get()
+            );
+        }
+
+        if ($user->hasRole('staff')) {
+            return response()->json(
+                Category::where('assigned_to', $user->id)->get()
+            );
+        }
+
+        abort(403, 'Unauthorized');
     }
 
-    // POST /api/categories
+    /**
+     * POST /api/categories
+     */
     public function createCategory(Request $request)
-    {   
-        $request->validate([
-            'name' => 'required|string'
+    {
+        $user = $request->user();
+
+        abort_unless($user->can('categories.create'), 403);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'assigned_to' => 'nullable|exists:users,id',
         ]);
 
         $category = Category::create([
-            'name' => $request->name
+            'name'        => $validated['name'],
+            'created_by'  => $user->id,
+            'assigned_to' => $validated['assigned_to'] ?? null,
         ]);
 
         return response()->json($category, 201);
     }
 
-
-    // GET /api/categories/{categoryId}
-    public function getCategory($categoryId)
+    /**
+     * GET /api/categories/{id}
+     */
+    public function getCategory(Request $request, $categoryId)
     {
-        return response()->json(
-            Category::findOrFail($categoryId)
-        );
+        $category = Category::findOrFail($categoryId);
+
+        $this->authorize('view', $category);
+
+        return response()->json($category);
     }
 
-    // PATCH /api/categories/{categoryId}
+    /**
+     * PATCH /api/categories/{id}
+     */
     public function updateCategory(Request $request, $categoryId)
     {
         $category = Category::findOrFail($categoryId);
 
+        $this->authorize('update', $category);
+
         $validated = $request->validate([
-            'name' => 'nullable|string'
+            'name' => 'sometimes|string|max:255',
+            'assigned_to' => 'nullable|exists:users,id',
         ]);
 
         $category->update($validated);
@@ -70,15 +87,35 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
-    // DELETE /api/categories/{categoryId}
-    public function deleteCategory($categoryId)
+    public function updateStatus(Request $request, Category $category)
     {
-        Category::findOrFail($categoryId)->delete();
+        $this->authorize('updateStatus', $category);
+
+        $validated = $request->validate([
+            'status' => 'required|string'
+        ]);
+
+        $category->update([
+            'status' => $validated['status']
+        ]);
+
+        return response()->json($category);
+    }
+
+
+    /**
+     * DELETE /api/categories/{id}
+     */
+    public function deleteCategory(Request $request, $categoryId)
+    {
+        $category = Category::findOrFail($categoryId);
+
+        $this->authorize('delete', $category);
+
+        $category->delete();
 
         return response()->json([
             'message' => 'Category deleted successfully'
         ]);
     }
-
-
 }
