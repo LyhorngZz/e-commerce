@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\AudienceController;
+use App\Http\Controllers\CommentController;
 
 // AUTH (LOGIN)
 
@@ -67,5 +71,11 @@ Route::middleware('auth:api')->group(function () {
             Route::get('/{productId}', 'getProduct');
             Route::patch('/{productId}', 'updateProduct');
             Route::delete('/{productId}', 'deleteProduct');
-        });
+    });
+
+    Route::post('/authors', [AuthorController::class, 'store']);
+    Route::post('/articles', [ArticleController::class, 'store']);
+    Route::post('/audiences', [AudienceController::class, 'store']);
+    Route::post('/audiences/subscribe', [AudienceController::class, 'subscribe']);
+    Route::post('/comments', [CommentController::class, 'store']);
 });
