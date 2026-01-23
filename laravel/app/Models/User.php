@@ -10,11 +10,6 @@ use App\Models\Role;
 //use Laravel\Sanctum\HasApiTokens;
 use Laravel\Passport\HasApiTokens;
 
-use App\Models\Author;
-use App\Models\Audience;
-use App\Models\Comment;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -73,20 +68,5 @@ class User extends Authenticatable
                 $q->where('name', $permission);
             })
             ->exists();
-    }
-
-    public function author(): HasOne
-    {
-        return $this->hasOne(Author::class);
-    }
-
-    public function audiences(): HasMany
-    {
-        return $this->hasMany(Audience::class);
-    }
-
-    public function comments(): HasMany
-    {
-        return $this->hasMany(Comment::class);
     }
 }
